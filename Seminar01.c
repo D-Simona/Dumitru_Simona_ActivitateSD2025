@@ -7,6 +7,13 @@
 
 #include<stdio.h>
 #include<malloc.h>
+#include<string.h>
+#include<stdlib.h>
+
+
+//adaugare in vector
+//citire din fisier
+//lista simplu inlantuita
 
 struct Client {
 	int id;
@@ -103,51 +110,157 @@ struct Client getPrimulClientDupaNume(struct Client* vector, int nrElemente, con
 	}
 	//return c;//daca vrem ultimul element
 }
-	
 
+void inserareInVector(struct Client** vector, int* dim, struct Client client) {
+	struct Client* aux = (struct Client*)malloc(sizeof(struct Client) * ((*dim) + 1));
+	for (int i = 0; i < *dim; i++) {
+		aux[i] = (*vector)[i];
+	}
+	aux[(*dim)] = client;
+	aux[*dim].nume = (char*)malloc(strlen(client.nume) + 1);
+	strcpy_s(aux[*dim].nume, strlen(client.nume) + 1, client.nume);
+	free(*vector);//dezalocare memorie
+	*vector = aux; //pointeaza catre noua zona de memoorie
+	(*dim)++;
+}
+	
+struct Client citireClientFisier(FILE* f) {
+	struct Client c;
+	char buffer[100];
+	char sep[3] = ",\n";
+	fgets(buffer, 100, f);
+	c.id = atoi(strtok(buffer, sep));
+	c.varsta = atoi(strtok(NULL, sep));
+	char *aux;
+	aux = strtok(NULL, sep);
+	c.nume = (char*)malloc(strlen(aux) + 1);
+	strcpy_s(c.nume, strlen(aux) + 1, aux);
+	c.buget = atof(strtok(NULL, sep));
+	c.initialaTata = strtok(NULL, sep)[0];
+	return c;
+}
+
+struct Client* citireVectorDinfisier(const char* numeFisier, int* dim) {
+	FILE* f = fopen(numeFisier, "r");
+	struct Client* vector = NULL;
+	(*dim) = 0;
+	while (!feof(f)) {
+		struct Client c= citireClientFisier(f);
+		inserareInVector(&vector, dim, c);
+	}
+	fclose(f);
+	return vector;
+}
+
+//liste simplu inlantuite
+struct Nod {
+	struct Client client;
+	struct Nod* next;
+
+};
+
+void inserareListaSfarsit(struct Nod** cap, struct Client c) {
+	struct Nod* nou = (struct Nod*)malloc(sizeof(struct Nod));
+	nou->client = c;
+	nou->client.nume = (char*)malloc(strlen(c.nume) + 1);//-> sageata folosim cand deferentiem si accesam <=> (*nou).client.nume
+	strcpy_s(nou->client.nume, strlen(c.nume) + 1, c.nume);
+	nou->next = NULL;
+
+	if (*cap) {
+		struct Nod* p = *cap;
+		while (p->next != NULL) {
+			p = p->next;
+		}
+		p->next = nou;
+	}
+	else {
+		*cap = nou;
+	}
+}
+
+//inserare la inceput si in interior tema pt acasa
+struct Nod* citireListaDinFisier(const char* numeFisier) {
+	struct Nod* cap = NULL; //obligatoriu de initializat
+	FILE* f = fopen(numeFisier, "r");
+	if (f != NULL) {
+		while (!feof(f)) {
+			struct Client c = citireClientFisier(f);
+			inserareListaSfarsit(&cap, c);
+			free(c.nume);
+		}
+	}
+	fclose(f);
+	return cap;
+}
+
+void afisareLista(struct Nod* cap) {
+	while (cap) {
+		afisare(cap->client);
+		cap = cap ->next;
+	}
+}
+
+void stergereLista(struct Nod**cap) {
+	while ((*cap) != NULL) {
+		struct Nod* aux = *cap;
+		(*cap) = (*cap)->next;
+		free(aux->client.nume);
+		free(aux);
+	}
+}
 
 int main() {
 
-	struct Client client = initializare(2, 23, "Popescu", 2000, 'B');
-	afisare(client);
+	//struct Client client = initializare(2, 23, "Popescu", 2000, 'B');
+	//afisare(client);
+	////struct Client multiClienti[30]; //alocare statica
+	//int numarClienti = 3;
+	//struct Client* clienti;
+	//clienti = (struct Client*)malloc(numarClienti * sizeof(struct Client));
+	////alocare dinamica
+	//clienti[0] = initializare(1, 22, "Ionescu", 100, 'J');
+	//clienti[1] = initializare(2, 23, "Vasilescu", 200, 'D');
+	//clienti[2] = initializare(3, 23, "Gigel", 400, 'T');
+	//printf("Clientul cautat:\n");
+	//struct Client c = getPrimulClientDupaNume(clienti, numarClienti, "Gigel");
+	//afisare(c);
+	//inserareInVector(&clienti, &numarClienti, c);
+	//printf("\nAfisare vector actualizat\n");
+	//afisareVector(clienti, numarClienti);
+	//free(c.nume);
+	//printf("Vector:\n");
+	//afisareVector(clienti, numarClienti);
+	//printf("%.2f", calculVarstaMedie(clienti, numarClienti));
+	//int nrClientiFideli = 2;
+	//struct Client* vectorScurt = copiazaPrimeleNElemente(clienti, numarClienti, nrClientiFideli);
+	//printf("\n\nClienti fideli:\n");
+	//afisareVector(vectorScurt, nrClientiFideli);
+	//struct Client* clientiCuBugetMare = NULL;
+	//int nrClientiCuBugetMare = 0;
+	//copiazaClientiCuBugetMare(clienti, numarClienti, 150, &clientiCuBugetMare, &nrClientiCuBugetMare);
+	//printf("\n\nClienti cu buget mare:\n");
+	//afisareVector(clientiCuBugetMare, nrClientiCuBugetMare);
+	//dezalocare(&clienti, &numarClienti);
+	//printf("Vectorul dupa stergere:\n");
+	//afisareVector(clienti, numarClienti);
 
-	//struct Client multiClienti[30]; //alocare statica
-	int numarClienti = 3;
-	struct Client* clienti;
-	clienti = (struct Client*)malloc(numarClienti * sizeof(struct Client));
-	//alocare dinamica
-	clienti[0] = initializare(1, 22, "Ionescu", 100, 'J');
-	clienti[1] = initializare(2, 23, "Vasilescu", 200, 'D');
-	clienti[2] = initializare(3, 23, "Gigel", 400, 'T');
+	/*FILE* f = fopen("clienti.txt", "r");
+	struct Client c = citireClientFisier(f);
+	afisare(c);
+	struct Client* clienti = NULL;
+	int nrClienti = 0;
+	clienti = citireVectorDinfisier("clienti.txt", &nrClienti);
+	afisareVector(clienti, nrClienti);
+	struct nod* cap = NULL;*/
 
-	printf("Clientul cautat:\n");
-	afisare(getPrimulClientDupaNume(clienti, numarClienti, "Gigel"));
+	struct Nod* cap = NULL;
+	cap = citireListaDinFisier("clienti.txt");
 
-	printf("Vector:\n");
-	afisareVector(clienti, numarClienti);
+	afisareLista(cap);
 
-	printf("%.2f", calculVarstaMedie(clienti, numarClienti));
-
-	int nrClientiFideli = 2;
-	struct Client* vectorScurt = copiazaPrimeleNElemente(clienti, numarClienti, nrClientiFideli);
-	printf("\n\nClienti fideli:\n");
-	afisareVector(vectorScurt, nrClientiFideli);
-
-
-	struct Client* clientiCuBugetMare = NULL;
-	int nrClientiCuBugetMare = 0;
-
-	copiazaClientiCuBugetMare(clienti, numarClienti, 150, &clientiCuBugetMare, &nrClientiCuBugetMare);
-	printf("\n\nClienti cu buget mare:\n");
-	afisareVector(clientiCuBugetMare, nrClientiCuBugetMare);
-
-	
-	dezalocare(&clienti, &numarClienti);
-
-	printf("Vectorul dupa stergere:\n");
-	afisareVector(clienti, numarClienti);
-
-	
+	stergereLista(&cap);
+	printf("\ndupa stergere:\n");
+	afisareLista(cap);
 
 	return 0;
 }
