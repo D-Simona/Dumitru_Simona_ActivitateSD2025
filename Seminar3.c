@@ -295,6 +295,8 @@ int main() {
 	afisarePreturiMedii(matrice, nrClustere, 2);
 
 
+
+
 	dezalocareTabelaDeMasini(&ht);
 	dezalocareMatrice(&matrice, &nrLinii, &nrClustere);
 	return 0;
