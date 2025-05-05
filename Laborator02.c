@@ -88,12 +88,18 @@ void copiazaTelefoaneScumpe(struct Telefon* vector, char nrElemente, float pretM
 
 }
 
-struct Telefon getPrimulElementConditionat(struct Telefon* vector, int nrElemente, const char* conditie) {
-	//trebuie cautat elementul care indeplineste o conditie
-	//dupa atributul de tip char*. Acesta este returnat.
+struct Telefon getPrimulTelefonByProducator(struct Telefon* vector, int nrElemente, const char* producator) {
+	//trebuie cautat elementul care indeplineste o conditie dupa atributul de tip char* (producator in cazul nostru). Acesta este returnat.
 	struct Telefon t;
-	t.id = 1;
-
+	t.producator = NULL;
+	for (int i = 0; i < nrElemente; i++) {
+		if (strcmp(vector[i].producator, producator)==0) {
+			t = vector[i];
+			t.producator = (char*)malloc(strlen(vector[i].producator) + 1);
+			strcpy_s(t.producator, strlen(vector[i].producator) + 1, vector[i].producator);
+			return t;
+		}
+	}
 	return t;
 }
 	
@@ -126,6 +132,15 @@ int main() {
 	printf("\n\nTelefoane sscumpe:\n");
 	afisareVector(telefoaneScumpe, nrTelefoaneScumpe);
 	dezalocare(&telefoaneScumpe, &nrTelefoaneScumpe);
+
+	struct Telefon telefon = getPrimulTelefonByProducator(telefoane, nrTelefoane, "Motorola");
+	printf("\n\nTellefonul gasit:\n");
+	afisare(telefon);
+	if (telefon.producator != NULL) {
+		free(telefon.producator);
+		telefon.producator = NULL;
+	}
+	dezalocare(&telefoane, &nrTelefoane);
 		
 	return 0;
 }
