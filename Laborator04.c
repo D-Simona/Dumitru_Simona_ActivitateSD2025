@@ -118,27 +118,80 @@ void dezalocareListaMasini(Nod** cap) {
 		}
 		free(p);
 	}
-
 }
 
-float calculeazaPretMediu(/*lista de masini*/) {
+float calculeazaPretMediu(Nod* cap) {
 	//calculeaza pretul mediu al masinilor din lista.
+	float suma = 0;
+	int contor = 0;
+	while (cap) {
+		suma += cap->info.pret;
+		contor++;
+		cap = cap->next;
+	}
+	if (contor > 0) {
+		return suma / contor;
+	}
+
 	return 0;
 }
 
-void stergeMasiniDinSeria(/*lista masini*/ char serieCautata) {
+void stergeMasiniDinSeria(Nod** cap, char serieCautata) {
 	//sterge toate masinile din lista care au seria primita ca parametru.
 	//tratati situatia ca masina se afla si pe prima pozitie, si pe ultima pozitie
+	while ((*cap) && (*cap)->info.serie == serieCautata) {
+		Nod* aux = (*cap);
+		(*cap) = aux->next;
+		if (aux->info.numeSofer) {
+			free(aux->info.numeSofer);
+		}
+		if (aux->info.model) {
+			free(aux->info.model);
+		}
+		free(aux);
+		}
+	if (!(*cap)) {	
+		Nod* p = (*cap);
+		while (p->next && p->next->info.serie != serieCautata) {
+			p = p->next;
+		}
+		if (p->next) {
+			Nod* aux = p->next;
+			p->next = aux->next;
+			if (aux->info.numeSofer) {
+				free(aux->info.numeSofer);
+			}
+			if (aux->info.model) {
+				free(aux->info.model);
+			}
+			free(aux);
+		}
+		}
+	}
+	
+
+
 }
 
-float calculeazaPretulMasinilorUnuiSofer(/*lista masini*/ const char* numeSofer) {
+float calculeazaPretulMasinilorUnuiSofer(Nod* cap, const char* numeSofer) {
 	//calculeaza pretul tuturor masinilor unui sofer.
-	return 0;
+	float suma = 0;
+	while (cap) {
+		if (strcmp(cap->info.numeSofer, numeSofer) == 0) {
+			suma += cap->info.pret;
+		}
+		cap = cap->next;
+	}
+	return suma;
 }
 
 int main() {
 	Nod* cap = citireListaMasiniDinFisier("masini.txt");
 	afisareListaMasini(cap);
+
+	printf("Pretul mediu este:%.2f\n", calculeazaPretMediu(cap));
+	printf("Pretul masinilor unui sofer este:%.2f", calculeazaPretulMasinilorUnuiSofer(cap, "Ionescu"));
+
 	dezalocareListaMasini(&cap);
 
 	return 0;
