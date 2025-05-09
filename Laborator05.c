@@ -161,16 +161,50 @@ float calculeazaPretMediu(ListaDubla lista) {
 	return 0;
 }
 
-void stergeMasinaDupaID(/*lista masini*/ int id) {
+void stergeMasinaDupaID(ListaDubla* lista, int id) {
 	//sterge masina cu id-ul primit.
 	//tratati situatia ca masina se afla si pe prima pozitie, si pe ultima pozitie
-
-
+	if (lista->first == NULL) {
+		return;
+	}
+	Nod* p = lista->first;
+	while (p!=NULL && p->masina.id != id) {
+		p = p->next;
+	}
+	if (p == NULL) {
+		return;
+	}
+	//avem ce sa stergem
+	if (p->prev == NULL) {
+		lista->first = p->next;
+		if (lista->first) {
+			lista->first->prev = NULL;
+		}
+	}
+	else {
+		p->prev->next = p->next;
+	}
+	if (p->next != NULL) {
+		p->next->prev = p->prev;
+	}
+	else {
+		lista->last = p->prev;
+	}
+	if (p->masina.model) {
+		free(p->masina.model);
+	}
+	if (p->masina.numeSofer) {
+		free(p->masina.numeSofer);
+	}
+	free(p);
+	lista->nrNoduri--;
 }
 
 char* getNumeSoferMasinaScumpa(/*lista dublu inlantuita*/) {
 	//cauta masina cea mai scumpa si 
 	//returneaza numele soferului acestei maasini.
+
+
 	return NULL;
 }
 
@@ -178,6 +212,7 @@ int main() {
 	ListaDubla lista = citireLDMasiniDinFisier("masini.txt");
 	afisareListaMasiniDeLaInceput(lista);
 	printf("-----------------------------\n");
+	stergeMasinaDupaID(&lista, 10);
 	afisareListaMasiniDeLaSfarsit(lista);
 	printf("\n Pretul mediu al masinilor este:%.2f\n", calculeazaPretMediu(lista));
 
